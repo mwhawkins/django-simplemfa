@@ -17,5 +17,8 @@ Upon testing various other Django MFA applications, most fell into one or more o
 - Django >= version 3.0
 - Django-Twilio (if using phone and/or text message MFA)
 
+Twilio is the only current integration for phone and text message, but more are planned.
+Email MFA is provided using the Django built-in email utilities.
+
 # Setup and Use
 Coming soon...
