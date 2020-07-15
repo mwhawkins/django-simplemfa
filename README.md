@@ -12,7 +12,7 @@ The intent of this project is to:
 At this time only email, phone call, and text message MFA options are supported. Future integrations (such as MS/Google Authenticator apps, OTP keys, WebAuthn, etc.) are possible but only if their integration adheres to the intent of this project as stated above.
 
 ## Why It Exists
-Upon evaluating various other Django MFA applications, most appeared to fall into one or more of the following categories:
+Upon evaluating various other Django MFA applications, most appeared to be one or more of the following:
 1. Their codebases were deprecated or unsupported.
 2. They often required a substantial amount of very specific dependenciesin order to even achieve basic functionality.
 3. The often required substantial changes to existing applications to function and integrate properly.
