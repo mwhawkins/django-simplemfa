@@ -1,0 +1,50 @@
+{% extends "simplemfa/mfa_base.html" %}
+{% load static %}
+
+{% block head %}
+    {% if not request.user.is_authenticated %}
+        <script type="text/javascript">
+            window.location = "{% url 'login' %}";
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+              <header>
+                <h2>MFA Verification</h2>
+              </header>
+                {% if form_errors %}
+                    {% for field, errors in form_errors.items %}
+                        {% for error in errors %}
+                            <p style="color:red;text-align:center;margin-bottom: 5px;font-weight:400;">* {{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                {% elif messages %}
+                    {% for message in messages %}
+                        <p style="color:green;text-align:center;margin-bottom: 5px;font-weight:400;">* {{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+
+              <!-- Form -->
+              <form action="{% url 'simplemfa:mfa-login' %}" method="post">
+                  <input type="hidden" name="next" value="{{ next|default:"/" }}">
+                  <input type="hidden" name="user_id" value="{{ request.user.id }}">
+                  {% csrf_token %}
+                <div>
+                    <label class="font-14" style="color:black;" for="id_auth_code">A code has been sent to you. Please enter it here:</label>
+                  <input id="id_auth_code" type="password" name="auth_code" placeholder="Verification Code" required>
+                </div>
+
+                <div>
+                  <button type="submit">Verify Code and Log In</button>
+                </div>
+              </form>
+              <!-- End Form -->
+
+              <footer>
+                  <p>Didn't get a code? <a href="{% url "simplemfa:mfa-request" %}">Request a new one</a>.
+                </p><br />
+                <p>Not ready to authenticate? <a href="{% url 'logout' %}">Log out</a>.
+                </p>
+              </footer>
+{% endblock %}
