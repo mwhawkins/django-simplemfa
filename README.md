@@ -3,6 +3,8 @@ A simple implementation of basic Multi-Factor Authentication (MFA) functionality
 
 Currently supports only email - phone call and text message coming soon. Consider supporting this project to expedite the timeline for implementation.
 
+[Now available on PyPI](https://pypi.org/project/django-simplemfa/)
+
 # Overview
 The intent of this project is to:
 1. Provide basic yet effective MFA functionality for new and existing Django applications.
