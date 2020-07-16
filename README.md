@@ -27,16 +27,18 @@ Email MFA leverages the built-in Django email utilities.
 # Setup and Use
 Download or clone the simple-mfa package.
 
-In your templates folder, create a directory called 'mfa' and in it place the following templates:
-- mfa/mfa_email.html (the email message template)
-- mfa/mfa_auth.html (the MFA login screen template)
-- mfa/mfa_base.html (the MDA base template)
+In your templates directory, create a new directory called 'mfa' and in it place or create the following templates:
+- `mfa/mfa_email.html` (the MFA email message template)
+- `mfa/mfa_text.html` (the MFA text message template)
+- `mfa/mfa_voice.html` (plain text file with the message you want to send via phone call)
+- `mfa/mfa_auth.html` (the MFA login screen template)
+- `mfa/mfa_base.html` (the MFA base template)
 
 In your urls.py, add:
 `path('mfa/', include('mfa.urls', namespace="mfa"))`
 
 In your settings.py:
-- Required: `REQUIRE_MFA = True`
+- Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
 - Required: `APP_NAME = "My App Name"`
 - Required: `DEFAULT_FROM_EMAIL = "my email@provider.com"`
 - Required: `LOGIN_REDIRECT_URL = 'my_login_view_name'`
