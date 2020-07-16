@@ -1,2 +1,1 @@
--r simplemfa/requirements.txt
 django-twilio>=0.13.0
