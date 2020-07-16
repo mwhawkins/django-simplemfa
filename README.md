@@ -25,23 +25,23 @@ Twilio is the current integration for phone and text message MFA, but more are p
 Email MFA leverages the built-in Django email utilities.
 
 # Setup and Use
-Download or clone the simple-mfa package.
+Download or clone the `simple-mfa` package here.
 
-In your templates directory, create a new directory called 'mfa' and in it place or create the following templates:
+**In your `templates` directory, create a new directory called 'simple_mfa' and in it place or create the following templates:**
 - `mfa/mfa_email.html` (the MFA email message template)
 - `mfa/mfa_text.html` (the MFA text message template)
 - `mfa/mfa_voice.html` (plain text file with the message you want to send via phone call)
 - `mfa/mfa_auth.html` (the MFA login screen template)
 - `mfa/mfa_base.html` (the MFA base template)
 
-In your urls.py, add:
+**In your `urls.py` add:**
 `path('simple-mfa/', include('simple-mfa.urls', namespace="simple-mfa"))`
 
-In your settings.py:
+**In your `settings.py`:**
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
-- Required: `APP_NAME = "My App Name"`
-- Required: `DEFAULT_FROM_EMAIL = "my email@provider.com"`
-- Required: `LOGIN_REDIRECT_URL = 'my_login_view_name'`
+- Required: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
+- Required: `DEFAULT_FROM_EMAIL = "my email@provider.com"` (the email address you want MFA messages to come from)
+- Required: `LOGIN_REDIRECT_URL = 'my_login_view_name'` (the view users are sent to if they are not authenticated)
 - Required: ```INSTALLED_APPS = [
                                   ...
                                   'simple-mfa'
@@ -52,20 +52,22 @@ In your settings.py:
                             'mfa.middleware.ValidateMFAMiddleware'
                             ]```
 - Optional: `MFA_CODE_LENGTH` (default is 6)
-- Optional: `MFA_CODE_EXPIRATION` (default is 900 (15 minutes))
+- Optional: `MFA_CODE_EXPIRATION` (default is 900 seconds (15 minutes))
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
 
-If using Twilio (for phone call or text message), you will need to install and set up djang-twilio according to the instructions for that package.
+If using Twilio (for phone call or text message), you will need to install and set up [djang-twilio](https://django-twilio.readthedocs.io/en/latest/) according to the instructions for that package.
 
-For email, ensure that your email is configured properly in your Django settings. 
+For email, ensure that your [email is configured properly](https://docs.djangoproject.com/en/3.0/topics/email/) in your Django settings. 
 
 Once those items are complete, run `makemigrations` then `migrate` for your project. 
 
-Run your project. It will allow you to access all public pages. After you authenticate, however, it will automatically redirect you to the MFA verification page where users will request and enter their MFA code. If the code passes, the user will be allowed to proceed as any normal authenticated user would in your application.
+Run your project. It should allow you to access all public (login exempt) pages. After you log in, however, it will automatically redirect you to the MFA verification page where you will request and then enter an MFA code. If the code passes, you will be allowed to proceed as any normal authenticated user would in your application.
 
 # Notes
 
-As of right now, MFA is applied globablly in the settings.py file. We are working on changing that to track in a User's settings as part of an "MFAProfile" model attached to the User object. A project example is coming shortly. 
+A project example is coming shortly.
+
+As of right now, MFA is applied globablly in the `settings.py` file. We are working on changing that to track in a User's settings as part of an `MFAProfile` model attached to the User object.
 
 MFA codes sent to users are stored as one-way hashed objects using Django's built-in hashers. It is treated as a password field in the application. The hashes are created and verified using Django's own `make_password()` and `check_password()` functions, respectively. The ONLY time a plain-text MFA code is created in the application is during the sending of the user message to the Twilio API or via email. At no other time are MFA codes rendered or stored as plain text. All MFA codes are destroyed immediately after use or upon expiration (`MFA_CODE_EXPIRATION`).
 
