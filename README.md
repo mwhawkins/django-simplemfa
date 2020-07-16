@@ -4,12 +4,12 @@ A simple implementation of basic Multi-Factor Authentication (MFA) functionality
 # Overview
 The intent of this project is to:
 1. Provide basic yet effective MFA functionality for new and existing Django applications.
-2. Limit external dependencies wherever feasible by leveraging as much of the Django framework itself as is possible.
+2. Limit external (outside Django) dependencies wherever feasible.
 3. Simplify the setup and integration of MFA functionality in Django applications.
 4. Limit the amount of alteration required in existing codebases to integrate basic MFA functionality.
 5. Provide options to integrate more advanced or customized MFA functionality if desired.
 
-At this time only email, phone call, and text message MFA options are supported. Future integrations (such as MS/Google Authenticator apps, OTP keys, WebAuthn, etc.) are possible but only if their integration adheres to the intent of this project as stated above.
+At this time only email, phone call, and text message MFA options are supported. Future integrations (such as MS/Google Authenticator apps, OTP keys, WebAuthn, etc.) are possible.
 
 ## Why It Exists
 Upon evaluating various other Django MFA applications, most appeared to be one or more of the following:
@@ -25,4 +25,47 @@ Twilio is the current integration for phone and text message MFA, but more are p
 Email MFA leverages the built-in Django email utilities.
 
 # Setup and Use
-Coming soon...
+Download or clone the simple-mfa package.
+
+In your templates folder, create a directory called 'mfa' and in it place the following templates:
+- mfa/mfa_email.html (the email message template)
+- mfa/mfa_auth.html (the MFA login screen template)
+- mfa/mfa_base.html (the MDA base template)
+
+In your urls.py, add:
+`path('mfa/', include('mfa.urls', namespace="mfa"))`
+
+In your settings.py:
+- Required: `REQUIRE_MFA = True`
+- Required: `APP_NAME = "My App Name"`
+- Required: `DEFAULT_FROM_EMAIL = "my email@provider.com"`
+- Required: `LOGIN_REDIRECT_URL = 'my_login_view_name'`
+- Required: ```INSTALLED_APPS = [
+                                  ...
+                                  'simple-mfa'
+                              ]```
+
+- Required:  ```MIDDLEWARE = [
+                                  ...
+                            'mfa.middleware.ValidateMFAMiddleware'
+                            ]```
+- Optional: `MFA_CODE_LENGTH` (default is 6)
+- Optional: `MFA_CODE_EXPIRATION` (default is 900 (15 minutes))
+- Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
+
+If using Twilio (for phone call or text message), you will need to install and set up djang-twilio according to the instructions for that package.
+
+For email, ensure that your email is configured properly in your Django settings. 
+
+Once those items are complete, run `makemigrations` then `migrate` for your project. 
+
+Run your project. It will allow you to access all public pages. After you authenticate, however, it will automatically redirect you to the MFA verification page where users will request and enter their MFA code. If the code passes, the user will be allowed to proceed as any normal authenticated user would in your application.
+
+# Notes
+
+As of right now, MFA is applied globablly in the settings.py file. We are working on changing that to track in a User's settings as part of an "MFAProfile" model attached to the User object. A project example is coming shortly. 
+
+MFA codes sent to users are stored as one-way hashed objects using Django's built-in hashers. It is treated as a password field in the application. The hashes are created and verified using Django's own `make_password()` and `check_password()` functions, respectively. The ONLY time a plain-text MFA code is created in the application is during the sending of the user message to the Twilio API or via email. At no other time are MFA codes rendered or stored as plain text. All MFA codes are destroyed immediately after use or upon expiration (`MFA_CODE_EXPIRATION`).
+
+
+
