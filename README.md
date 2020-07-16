@@ -25,7 +25,7 @@ Twilio is the current integration for phone and text message MFA, but more are p
 Email MFA leverages the built-in Django email utilities.
 
 # Setup and Use
-Download or clone the `simple-mfa` package here.
+Download or clone the `simplemfa` package here.
 
 **In your `templates` directory, create a new directory called 'simple_mfa' and in it place or create the following templates:**
 - `mfa/mfa_email.html` (the MFA email message template)
@@ -35,7 +35,7 @@ Download or clone the `simple-mfa` package here.
 - `mfa/mfa_base.html` (the MFA base template)
 
 **In your `urls.py` add:**
-`path('simple-mfa/', include('simple-mfa.urls', namespace="simple-mfa"))`
+`path('mfa/', include('simplemfa.urls', namespace="simplemfa"))`
 
 **In your `settings.py`:**
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
@@ -44,12 +44,12 @@ Download or clone the `simple-mfa` package here.
 - Required: `LOGIN_REDIRECT_URL = 'my_login_view_name'` (the view users are sent to if they are not authenticated)
 - Required: ```INSTALLED_APPS = [
                                   ...
-                                  'simple-mfa'
+                                  'simplemfa'
                               ]```
 
 - Required:  ```MIDDLEWARE = [
                                   ...
-                            'mfa.middleware.ValidateMFAMiddleware'
+                            'simplemfa.middleware.ValidateMFAMiddleware'
                             ]```
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_CODE_EXPIRATION` (default is 900 seconds (15 minutes))
