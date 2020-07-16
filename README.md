@@ -35,7 +35,7 @@ In your templates directory, create a new directory called 'mfa' and in it place
 - `mfa/mfa_base.html` (the MFA base template)
 
 In your urls.py, add:
-`path('mfa/', include('mfa.urls', namespace="mfa"))`
+`path('simple-mfa/', include('simple-mfa.urls', namespace="simple-mfa"))`
 
 In your settings.py:
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
