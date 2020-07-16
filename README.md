@@ -29,7 +29,7 @@ Email MFA leverages the built-in Django email utilities.
 # Setup and Use
 Download or clone the `simplemfa` package here and run setup or install from PyPi with `pip install django-simplemfa`.
 
-**In your `templates` directory, create a new directory called 'simple_mfa' and in it place or create the following templates:**
+**In your `templates` directory, create a new directory called 'simplemfa' and in it place or create the following templates:**
 - `mfa/mfa_email.html` (the MFA email message template)
 - `mfa/mfa_text.html` (the MFA text message template)
 - `mfa/mfa_voice.html` (plain text file with the message you want to send via phone call)
