@@ -27,7 +27,7 @@ Twilio is the current integration for phone and text message MFA, but more are p
 Email MFA leverages the built-in Django email utilities.
 
 # Setup and Use
-Download or clone the `simplemfa` package here.
+Download or clone the `simplemfa` package here and run setup or install from PyPi with `pip install django-simplemfa`.
 
 **In your `templates` directory, create a new directory called 'simple_mfa' and in it place or create the following templates:**
 - `mfa/mfa_email.html` (the MFA email message template)
