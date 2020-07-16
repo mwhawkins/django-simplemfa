@@ -36,10 +36,12 @@ Download or clone the `simplemfa` package here and run setup or install from PyP
 - `simplemfa/mfa_auth.html` (the MFA login screen template)
 - `simplemfa/mfa_base.html` (the MFA base template, optional if you have a separate base template)
 
-Examples are provided in the source code's `templates` directory.
+Examples are provided in the package's `templates` directory (`simplemfa/templates`).
 
 **In your `urls.py` add:**
 `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))`
+
+Make sure to include the namespace as above.
 
 **In your `settings.py`:**
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
