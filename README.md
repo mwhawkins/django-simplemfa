@@ -16,7 +16,7 @@ At this time only email, phone call, and text message MFA options are supported.
 ## Why It Exists
 Upon evaluating various other Django MFA applications, most appeared to be one or more of the following:
 1. Their codebases were deprecated or unsupported.
-2. They often required a substantial amount of very specific dependenciesin order to even achieve basic functionality.
+2. They often required a substantial amount of very specific dependencies in order to even achieve basic functionality.
 3. The often required substantial changes to existing applications to function and integrate properly.
 
 ## Basic Requirements
