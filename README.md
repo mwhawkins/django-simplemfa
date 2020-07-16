@@ -34,7 +34,7 @@ Download or clone the `simplemfa` package here and run setup or install from PyP
 - `simplemfa/mfa_text.html` (the MFA text message template)
 - `simplemfa/mfa_voice.html` (plain text file with the message you want to send via phone call)
 - `simplemfa/mfa_auth.html` (the MFA login screen template)
-- `simplemfa/mfa_base.html` (the MFA base template)
+- `simplemfa/mfa_base.html` (the MFA base template, optional if you have a separate base template)
 
 Examples are provided in the source code's `templates` directory.
 
