@@ -31,7 +31,7 @@ def random_string(string_length=CODE_STRING_LENGTH, all_uppercase=True, all_lowe
         return ''.join(random.choice(letters.upper()) for i in range(string_length))
 
 
-def hash_this(input, salt=settings.SECRET_KEY):
+def hash_this(input):
     try:
         return make_password(input)
     except:
