@@ -1,1 +1,2 @@
+django>=3.0
 django-twilio>=0.13.0
