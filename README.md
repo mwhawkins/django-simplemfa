@@ -1,4 +1,4 @@
-# django-simple-mfa
+# django-simplemfa
 A simple implementation of basic Multi-Factor Authentication (MFA) functionality for Django applications.
 
 # Overview
