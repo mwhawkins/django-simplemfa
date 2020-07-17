@@ -49,7 +49,7 @@ Make sure to include the namespace as above.
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
 - Required: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
 - Required: `DEFAULT_FROM_EMAIL = "my email@provider.com"` (the email address you want MFA messages to come from)
-- Required: `LOGIN_REDIRECT_URL = 'my_login_view_name'` (the view users are sent to if they are not authenticated)
+- Required: `LOGIN_REDIRECT_URL = 'my_view_name'` (the default view users are sent to after they authenticate)
 - Required: ```INSTALLED_APPS = [
                                   ...
                                   'simplemfa'
