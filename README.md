@@ -35,7 +35,7 @@ Download or clone the `simplemfa` package here and run setup or install from PyP
 - `simplemfa/mfa_email.html` (the MFA email message template)
 - `simplemfa/mfa_text.html` (the MFA text message template)
 - `simplemfa/mfa_voice.html` (plain text file with the message you want to send via phone call)
-- `simplemfa/mfa_auth.html` (the MFA login screen template)
+- `simplemfa/auth.html` (the MFA login screen template)
 - `simplemfa/mfa_base.html` (the MFA base template, optional if you have a separate base template)
 
 Examples are provided in the package's `templates` directory (`simplemfa/templates`).
@@ -46,9 +46,11 @@ Examples are provided in the package's `templates` directory (`simplemfa/templat
 Make sure to include the namespace as above.
 
 **In your `settings.py`:**
+
+Required Settings:
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
 - Required: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
-- Required: `DEFAULT_FROM_EMAIL = "my email@provider.com"` (the email address you want MFA messages to come from)
+- Required: `DEFAULT_FROM_EMAIL = "myemail@provider.com"` (the email address you want MFA messages to come from)
 - Required: `LOGIN_REDIRECT_URL = 'my_view_name'` (the default view users are sent to after they authenticate)
 - Required: ```INSTALLED_APPS = [
                                   ...
@@ -59,6 +61,9 @@ Make sure to include the namespace as above.
                                   ...
                             'simplemfa.middleware.ValidateMFAMiddleware'
                             ]```
+                            
+                            
+Optional Settings:
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_CODE_EXPIRATION` (default is 900 seconds (15 minutes))
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
