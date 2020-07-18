@@ -109,7 +109,18 @@ def send_mfa_code_phone(request, code):
     return False
 
 
-def send_mfa_code(request, code, mode="EMAIL"):
+def get_user_mfa_mode(request):
+    if hasattr(settings, "MFA_USER_MODE_ATTRIBUTE"):
+        mode_attr_string = f"request.user.{settings.MFA_USER_MODE_ATTRIBUTE}"
+        return eval(mode_attr_string) if eval(mode_attr_string) is not None else "EMAIL"
+    else:
+        return "EMAIL"
+
+
+def send_mfa_code(request, code, mode=None):
+    if mode is None:
+        mode = get_user_mfa_mode(request)
+
     if mode == "TEXT":
         result = send_mfa_code_text(request, code)
         if not result:
@@ -120,3 +131,4 @@ def send_mfa_code(request, code, mode="EMAIL"):
             return send_mfa_code_email(request, code)
     else:
         return send_mfa_code_email(request, code)
+

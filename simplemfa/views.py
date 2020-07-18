@@ -6,8 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from simplemfa.models import AuthCode
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseBadRequest
-from django.http import HttpResponse, JsonResponse
-from simplemfa.helpers import template_fallback
+from django.http import JsonResponse
+from simplemfa.helpers import template_fallback, get_user_mfa_mode
 from django.contrib import messages
 from simplemfa.helpers import send_mfa_code
 
@@ -30,8 +30,8 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
                 # delete old codes (if any) for this user
                 AuthCode.delete_all_codes_for_user(request.user.id)
 
-                # the selected mode for the user to get the code, eventually get this from a profile setting
-                mode = "EMAIL"
+                # the selected mode for the user to get the code
+                mode = get_user_mfa_mode(request)
 
                 # create the new MFA auth object
                 code = AuthCode.create_code_for_user(request.user.id, sent_via=mode)
@@ -41,7 +41,7 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
                     request.session['_simplemfa_code_sent'] = True
 
                     # eventually replace this with send_mfa_code(request, code, mode) where mode is how it is to be sent
-                    send_mfa_code(request, code, mode)
+                    send_mfa_code(request, code, mode=mode)
 
                     # for testing in development
                     if settings.DEBUG:
@@ -96,7 +96,7 @@ class MFARequestView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         # variables
-        mode = request.GET.get("sent_via", "EMAIL")
+        mode = request.GET.get("sent_via", get_user_mfa_mode(request))
 
         # start doing some work
         response = {}
@@ -135,7 +135,7 @@ class MFARequestView(LoginRequiredMixin, View):
             raise HttpResponseBadRequest
 
         # POST variables
-        mode = request.POST.get("sent_via", request.GET.get("sent_via", "EMAIL"))
+        mode = request.POST.get("sent_via", request.GET.get("sent_via", get_user_mfa_mode(request)))
         user_id = request.POST.get("user_id", None)
 
         # verify the user is who they say they are
