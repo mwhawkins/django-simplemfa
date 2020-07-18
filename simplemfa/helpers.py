@@ -89,15 +89,16 @@ def send_mfa_code_phone(request, code):
             if recipient is not None:
                 response = VoiceResponse()
                 say = Say()
-                say.break_(strength="weak", time="200ms")
-                say.p(msg)
+                say.p(f",,,{msg},,,")
                 for char in code:
                     say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
-                    say.break_(strength="strong", time="3000ms")
-                say.p(f"Again, {msg}")
+                say.p(f",,,Again, {msg},,,")
                 for char in code:
                     say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
-                    say.break_(strength="strong", time="3000ms")
+                say.p(f",,,Again, {msg},,,")
+                for char in code:
+                    say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
+                say.p(",,,Goodbye!")
                 response.append(say)
                 print(response.to_xml())
                 client.calls.create(to=recipient,
