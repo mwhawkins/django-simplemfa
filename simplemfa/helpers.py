@@ -35,8 +35,7 @@ def get_message_context(request, code):
     context = {
         'username': request.user.username,
         'request': request,
-        'app_name': settings.APP_NAME if hasattr(settings, "APP_NAME") else f"the application at "
-                                                                            f"{request.build_absolute_uri(location=reverse('mfa:mfa-login'))}",
+        'app_name': settings.APP_NAME if hasattr(settings, "APP_NAME") else f"{request.META.get('HTTP_HOST')}",
         'code': code,
         'url': request.build_absolute_uri(location=reverse('mfa:mfa-login'))
     }
