@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name="django-simplemfa",
-    version="0.1",
+    version="0.2",
     author="Michael Hawkins",
     author_email="mhawkins@netizen.net",
     description="An implementation of basic multi-factor authentication (MFA) for django projects",
