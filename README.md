@@ -5,11 +5,9 @@ An implementation of basic Multi-Factor Authentication (MFA) functionality for D
 
 # Overview
 The intent of this project is to:
-1. Provide basic yet effective MFA functionality for new and existing Django applications.
+1. Provide essential MFA functionality for new and existing Django applications.
 2. Limit external (outside Django) dependencies wherever feasible.
 3. Simplify the setup and integration of MFA functionality in Django applications.
-4. Limit the amount of alteration required in existing codebases to integrate basic MFA functionality.
-5. Provide options to integrate more advanced or customized MFA functionality if desired.
 
 At this time only email, phone call, and text message MFA options are supported. Future integrations (such as MS/Google Authenticator apps, OTP keys, WebAuthn, etc.) are possible.
 
