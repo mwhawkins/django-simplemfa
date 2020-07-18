@@ -55,7 +55,7 @@ def send_mfa_code_email(request, code):
     msg = html_template.render(context)
     subject = f"{context['app_name']} Verification Code"
     default_from_email = settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else "user@localhost"
-    send_mail(subject, msg, default_from_email, [request.user.email], fail_silently=False)
+    return send_mail(subject, msg, default_from_email, [request.user.email], fail_silently=False)
 
 
 def send_mfa_code_text(request, code):
@@ -123,13 +123,15 @@ def send_mfa_code(request, code, mode=None):
         mode = get_user_mfa_mode(request)
 
     if mode == "TEXT":
-        result = send_mfa_code_text(request, code)
-        if not result:
+        if not send_mfa_code_text(request, code):
             return send_mfa_code_email(request, code)
+        else:
+            return True
     elif mode == "PHONE":
-        result = send_mfa_code_phone(request, code)
-        if not result:
+        if not send_mfa_code_phone(request, code):
             return send_mfa_code_email(request, code)
+        else:
+            return True
     else:
         return send_mfa_code_email(request, code)
 
