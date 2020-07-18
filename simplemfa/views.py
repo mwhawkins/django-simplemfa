@@ -154,7 +154,7 @@ class MFARequestView(LoginRequiredMixin, View):
             code = AuthCode.create_code_for_user(request.user.id, sent_via=mode)
 
             # send code to the user, depending on selected mode
-            send_mfa_code(request, code)
+            send_mfa_code(request, code, mode=mode)
 
             # for testing in development
             if settings.DEBUG:
