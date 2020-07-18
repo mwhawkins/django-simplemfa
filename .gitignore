@@ -76,3 +76,4 @@ target/
 .idea/sonarlint/issuestore/c/8/c89f39e8b3f6ce81992912a59debecac3f8491d3
 .idea/sonarlint/issuestore/d/d/dd84574f268303f64d00c32a739c9e137255dbfd
 .idea/sonarlint/issuestore/index.pb
+*.pyc
