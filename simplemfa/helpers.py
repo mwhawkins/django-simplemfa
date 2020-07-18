@@ -51,7 +51,7 @@ def get_twilio_client():
 
 
 def send_mfa_code_email(request, code):
-    html_template = get_template('mfa/auth_email.html')
+    html_template = get_template('simplemfa/auth_email.html')
     context = get_message_context(request, code)
     msg = html_template.render(context)
     subject = f"{context['app_name']} Verification Code"
