@@ -56,3 +56,10 @@ docs/_build/
 
 # PyBuilder
 target/
+.idea/django-simple-mfa.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/sonarIssues.xml
+.idea/vcs.xml
