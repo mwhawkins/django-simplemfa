@@ -54,6 +54,13 @@ class AuthCode(models.Model):
     code = models.CharField(max_length=255, default=generate_code)
     sent_via = models.CharField(max_length=15, choices=AUTH_CODE_DELIVERY_CHOICES, default=CODE_DELIVERY_DEFAULT)
 
+    class Meta:
+        verbose_name = "Simple MFA Authentication Code"
+        verbose_name_plural = "Simple MFA Authentication Codes"
+
+    def __str__(self):
+        return f"User: {self.user.username} | Created: {self.created} | Sent Via: {self.sent_via}"
+
     @classmethod
     def delete_all_codes_for_user(cls, user_id):
         auths = cls.objects.filter(user_id=user_id)
