@@ -1,5 +1,5 @@
 # django-simplemfa
-A simple implementation of basic Multi-Factor Authentication (MFA) functionality for Django applications.
+An implementation of basic Multi-Factor Authentication (MFA) functionality for Django applications.
 
 Currently supports only email - phone call and text message coming soon. Consider supporting this project to expedite the timeline for implementation.
 
