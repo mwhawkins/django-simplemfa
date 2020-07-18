@@ -33,7 +33,7 @@ class MFAAuth(forms.Form):
             if auth.expires <= now:
                 self.add_error("auth_code", "Your code has expired. Please request a new one.")
                 auth.delete()
-            elif not check_password(auth_code, auth.code):
+            elif not check_password(auth_code.upper(), auth.code):
                 self.add_error("auth_code", "An invalid code was entered. Please try again or request a new one.")
 
     def authenticate(self):

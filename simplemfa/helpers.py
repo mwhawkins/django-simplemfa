@@ -3,6 +3,8 @@ from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
 from django.shortcuts import reverse
+from twilio.twiml.voice_response import VoiceResponse, Say
+from twilio.rest import Client
 
 
 def get_client_ip(request):
@@ -29,25 +31,93 @@ def template_fallback(values):
     raise template.TemplateDoesNotExist
 
 
-def send_mfa_code_email(request, code):
-    html_template = get_template('simplemfa/auth_email.html')
+def get_message_context(request, code):
     context = {
         'username': request.user.username,
         'request': request,
-        'app_name': settings.APP_NAME if hasattr(settings, "APP_NAME") else f"{request.scheme}://"
-                                                                            f"{request.META.get('HTTP_HOST')}",
+        'app_name': settings.APP_NAME if hasattr(settings, "APP_NAME") else f"the application at "
+                                                                            f"{request.build_absolute_uri(location=reverse('mfa:mfa-login'))}",
         'code': code,
-        'mfa_url': request.build_absolute_uri(location=reverse('simplemfa:mfa-login'))
+        'url': request.build_absolute_uri(location=reverse('mfa:mfa-login'))
     }
+    return context
+
+
+def get_twilio_client():
+    if hasattr(settings, "TWILIO_ACCOUNT_SID") and hasattr(settings, "TWILIO_AUTH_TOKEN") and \
+            hasattr(settings, "TWILIO_NUMBER"):
+        return Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+    return None
+
+
+def send_mfa_code_email(request, code):
+    html_template = get_template('mfa/auth_email.html')
+    context = get_message_context(request, code)
     msg = html_template.render(context)
     subject = f"{context['app_name']} Verification Code"
     default_from_email = settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else "user@localhost"
     send_mail(subject, msg, default_from_email, [request.user.email], fail_silently=False)
 
 
+def send_mfa_code_text(request, code):
+    template = get_template('simplemfa/auth_text.html')
+    context = get_message_context(request, code)
+    msg = str(template.render(context))
+    client = get_twilio_client()
+    if hasattr(settings, "MFA_USER_PHONE_ATTRIBUTE") and client is not None:
+        phone_object_string = f"request.user.{settings.MFA_USER_PHONE_ATTRIBUTE}"
+        try:
+            recipient = eval(phone_object_string)
+            if recipient is not None:
+                client.messages.create(to=recipient,
+                                       from_=settings.TWILIO_NUMBER,
+                                       body=msg)
+                return True
+        except:
+            return False
+    return False
+
+
+def send_mfa_code_phone(request, code):
+    template = get_template('simplemfa/auth_voice.html')
+    context = get_message_context(request, code)
+    msg = str(template.render(context)) + ","
+    client = get_twilio_client()
+    if hasattr(settings, "MFA_USER_PHONE_ATTRIBUTE") and client is not None:
+        phone_object_string = f"request.user.{settings.MFA_USER_PHONE_ATTRIBUTE}"
+        try:
+            recipient = eval(phone_object_string)
+            if recipient is not None:
+                response = VoiceResponse()
+                say = Say()
+                say.break_(strength="weak", time="200ms")
+                say.p(msg)
+                for char in code:
+                    say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
+                    say.break_(strength="strong", time="3000ms")
+                say.p(f"Again, {msg}")
+                for char in code:
+                    say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
+                    say.break_(strength="strong", time="3000ms")
+                response.append(say)
+                print(response.to_xml())
+                client.calls.create(to=recipient,
+                                    from_=settings.TWILIO_NUMBER,
+                                    twiml=str(response.to_xml()))
+                return True
+        except:
+            return False
+    return False
+
+
 def send_mfa_code(request, code, mode="EMAIL"):
-    if mode == "EMAIL":
-        return send_mfa_code_email(request, code)
+    if mode == "TEXT":
+        result = send_mfa_code_text(request, code)
+        if not result:
+            return send_mfa_code_email(request, code)
+    elif mode == "PHONE":
+        result = send_mfa_code_phone(request, code)
+        if not result:
+            return send_mfa_code_email(request, code)
     else:
-        # add more options here later
         return send_mfa_code_email(request, code)
