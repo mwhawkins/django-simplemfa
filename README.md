@@ -36,7 +36,6 @@ Download or clone the `simplemfa` package here or install from PyPi with `pip in
 - `simplemfa/mfa_text.html` (the MFA text message template)
 - `simplemfa/mfa_voice.html` (plain text file with the message you want to send via phone call)
 - `simplemfa/auth.html` (the MFA login screen template)
-- `simplemfa/mfa_base.html` (the MFA base template, optional if you have a separate base template)
 
 Examples are provided in the package's `templates` directory (`simplemfa/templates`).
 
@@ -50,7 +49,6 @@ Make sure to include the namespace as above.
 Required Settings:
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
 - Required: `DEFAULT_FROM_EMAIL = "myemail@provider.com"` (the email address you want MFA messages to come from)
-- Required: `LOGIN_REDIRECT_URL = 'my_view_name'` (the default view users are sent to after they authenticate)
 - Required: ```INSTALLED_APPS = [
                                   ...
                                   'simplemfa'
@@ -64,11 +62,13 @@ Required Settings:
 If using Twilio (text and voice):
 - Required: `TWILIO_AUTH_TOKEN` (your Twilio Auth Token)
 - Required: `TWILIO_ACCOUNT_SID` (your Twilio account SID)
-- Required: `TWILIO_NUMBER` (your Twilio phone number)
+- Required: `TWILIO_NUMBER` (your Twilio phone number you want MFA codes sent from)
 - Required: `MFA_USER_PHONE_ATTRIBUTE` (the attribute of `request.user` that has the phone number for the user in the format `+12345678900`, e.g. `profile.phone` resolves to `request.user.profile.phone`)
+- Required: `MFA_USER_MODE_ATTRIBUTE` (the attribute of `request.user` that has the user's default way of receiving the MFA code, e.g. `profile.mfa_mode` resolves to `request.user.profile.mfa_mode` which must be one of the choices from `simplemfa.models.AUTH_CODE_DELIVERY_CHOICES` - currently "EMAIL", "TEXT", and "PHONE")
 
 Optional Settings:
 - Optional: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
+- Optional: `LOGIN_REDIRECT_URL = 'my_view_name'` (the default view users are sent to after they authenticate)
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_CODE_EXPIRATION` (default is 900 seconds (15 minutes))
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
