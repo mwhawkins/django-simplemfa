@@ -2,8 +2,6 @@ from django import template
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
-from django.urls import resolve
-import sys
 from django.shortcuts import reverse
 
 
@@ -36,10 +34,10 @@ def send_mfa_code_email(request, code):
     context = {
         'username': request.user.username,
         'request': request,
-        'app_name': settings.APP_NAME if hasattr(settings, "APP_NAME") else f"the application at "
-                                                                            f"{request.build_absolute_uri(location=reverse('mfa:mfa-login'))}",
+        'app_name': settings.APP_NAME if hasattr(settings, "APP_NAME") else f"{request.scheme}://"
+                                                                            f"{request.META.get('HTTP_HOST')}",
         'code': code,
-        'url': request.build_absolute_uri(location=reverse('mfa:mfa-login'))
+        'mfa_url': request.build_absolute_uri(location=reverse('simplemfa:mfa-login'))
     }
     msg = html_template.render(context)
     subject = f"{context['app_name']} Verification Code"
@@ -47,6 +45,9 @@ def send_mfa_code_email(request, code):
     send_mail(subject, msg, default_from_email, [request.user.email], fail_silently=False)
 
 
-def send_mfa_code(request, code):
-    # add more options here later
-    return send_mfa_code_email(request, code)
+def send_mfa_code(request, code, mode="EMAIL"):
+    if mode == "EMAIL":
+        return send_mfa_code_email(request, code)
+    else:
+        # add more options here later
+        return send_mfa_code_email(request, code)

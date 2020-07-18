@@ -60,6 +60,16 @@ class AuthCode(models.Model):
         for auth in auths.all():
             auth.delete()
 
+    @classmethod
+    def create_code_for_user(cls, user_id, sent_via="EMAIL"):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return None
+        else:
+            obj = cls.objects.create(user=user, sent_via=sent_via)
+            return obj.create_code()
+
     def create_code(self):
         code = random_string()
         self.code = generate_code(code=code)

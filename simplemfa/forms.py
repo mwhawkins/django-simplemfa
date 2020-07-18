@@ -27,14 +27,14 @@ class MFAAuth(forms.Form):
             now = timezone.now()
             AuthCode.objects.get(user=user)
         except [AuthCode.DoesNotExist, AuthCode.MultipleObjectsReturned]:
-            self.add_error("auth_code", "Your code was not found. Please request a new one.")
+            self.add_error("auth_code", "The code for your account was not found. Please request a new one.")
         else:
             auth = AuthCode.objects.get(user=user)
             if auth.expires <= now:
                 self.add_error("auth_code", "Your code has expired. Please request a new one.")
                 auth.delete()
             elif not check_password(auth_code, auth.code):
-                self.add_error("auth_code", "An invalid code was provided. Please request a new one.")
+                self.add_error("auth_code", "An invalid code was entered. Please try again or request a new one.")
 
     def authenticate(self):
         if self.is_valid():
@@ -43,8 +43,8 @@ class MFAAuth(forms.Form):
                 for auth in auths:
                     auth.delete()
                 return True
-            except [AuthCode.DoesNotExist, AuthCode.MultipleObjectsReturned]:
-                self.add_error("auth_code", "We are unable to authenticate the code provided. "
+            except:
+                self.add_error("auth_code", "We are unable to find any codes. "
                                             "Request a new one and try again.")
                 return False
         return False
