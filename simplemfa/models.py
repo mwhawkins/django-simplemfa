@@ -55,8 +55,8 @@ class AuthCode(models.Model):
     sent_via = models.CharField(max_length=15, choices=AUTH_CODE_DELIVERY_CHOICES, default=CODE_DELIVERY_DEFAULT)
 
     class Meta:
-        verbose_name = "Simple MFA Authentication Code"
-        verbose_name_plural = "Simple MFA Authentication Codes"
+        verbose_name = "MFA Authentication Code"
+        verbose_name_plural = "MFA Authentication Codes"
 
     def __str__(self):
         return f"User: {self.user.username} | Created: {self.created} | Sent Via: {self.sent_via}"
