@@ -62,7 +62,12 @@ Required Settings:
                             'simplemfa.middleware.ValidateMFAMiddleware'
                             ]```
                             
-                            
+If using Twilio (text and voice):
+- Required: `TWILIO_AUTH_TOKEN` (your Twilio Auth Token)
+- Required: `TWILIO_ACCOUNT_SID` (your Twilio account SID)
+- Required: `TWILIO_NUMBER` (your Twilio phone number)
+- Required: `MFA_USER_PHONE_ATTRIBUTE` (the attribute of `request.user` that has the phone number for the user in the format `+12345678900`, e.g. `profile.phone` resolves to `request.user.profile.phone`)
+
 Optional Settings:
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_CODE_EXPIRATION` (default is 900 seconds (15 minutes))
