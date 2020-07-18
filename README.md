@@ -49,7 +49,6 @@ Make sure to include the namespace as above.
 
 Required Settings:
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
-- Required: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
 - Required: `DEFAULT_FROM_EMAIL = "myemail@provider.com"` (the email address you want MFA messages to come from)
 - Required: `LOGIN_REDIRECT_URL = 'my_view_name'` (the default view users are sent to after they authenticate)
 - Required: ```INSTALLED_APPS = [
@@ -69,6 +68,7 @@ If using Twilio (text and voice):
 - Required: `MFA_USER_PHONE_ATTRIBUTE` (the attribute of `request.user` that has the phone number for the user in the format `+12345678900`, e.g. `profile.phone` resolves to `request.user.profile.phone`)
 
 Optional Settings:
+- Optional: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_CODE_EXPIRATION` (default is 900 seconds (15 minutes))
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
@@ -80,6 +80,8 @@ For email, ensure that your [email is configured properly](https://docs.djangopr
 Once those items are complete, run `makemigrations` then `migrate` for your project. 
 
 Run your project. It should allow you to access all public (login exempt) pages. After you log in, however, it will automatically redirect you to the MFA verification page where you will request and then enter an MFA code. If the code passes, you will be allowed to proceed as any normal authenticated user would in your application.
+
+That's it!
 
 # Notes
 
