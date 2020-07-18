@@ -25,11 +25,10 @@ class MFAAuth(forms.Form):
 
         try:
             now = timezone.now()
-            AuthCode.objects.get(user=user)
+            auth = AuthCode.objects.get(user=user)
         except [AuthCode.DoesNotExist, AuthCode.MultipleObjectsReturned]:
             self.add_error("auth_code", "The code for your account was not found. Please request a new one.")
         else:
-            auth = AuthCode.objects.get(user=user)
             if auth.expires <= now:
                 self.add_error("auth_code", "Your code has expired. Please request a new one.")
                 auth.delete()
