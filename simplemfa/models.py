@@ -20,14 +20,15 @@ AUTH_CODE_DELIVERY_CHOICES = [
 
 def random_string(string_length=CODE_STRING_LENGTH, all_uppercase=True, all_lowercase=False, mixed_case=False,
                   include_numbers=True, only_numbers=False):
-    letters = string.ascii_letters
-    if include_numbers:
-        letters += string.octdigits
 
     if only_numbers:
         range_start = 10 ** (string_length - 1)
         range_end = (10 ** string_length) - 1
         return str(randint(range_start, range_end))
+
+    letters = string.ascii_letters
+    if include_numbers:
+        letters += string.octdigits
 
     if all_uppercase:
         return ''.join(random.choice(letters.upper()) for i in range(string_length))

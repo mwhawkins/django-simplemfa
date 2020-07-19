@@ -19,7 +19,8 @@ class ValidateMFAMiddleware:
         if 'simplemfa' in request.resolver_match.namespaces:
             return None
 
-        if request.path in [reverse("simplemfa:mfa-login"), reverse("simplemfa:mfa-request")]:
+        if request.path in [reverse("simplemfa:mfa-login"), reverse("simplemfa:mfa-request"),
+                            reverse("login"), reverse("logout")]:
             return None
 
         if request.user.is_authenticated and mfa_required and not mfa_authenticated:
