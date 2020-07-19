@@ -61,4 +61,5 @@ target/
 
 # IDE
 .idea/
+.idea/sonarlint/
 .idea/*
