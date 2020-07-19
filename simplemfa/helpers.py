@@ -88,16 +88,17 @@ def send_mfa_code_phone(request, code):
             recipient = eval(phone_object_string)
             if recipient is not None:
                 response = VoiceResponse()
+                code_list = [str(i) for i in str(code)]
                 say = Say()
                 say.p(f",,,{msg},,,")
-                for char in code:
-                    say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
+                for char in code_list:
+                    say.say_as(f",,,,,{str(char)},,,,,", interpret_as="spell-out")
                 say.p(f",,,Again, {msg},,,")
-                for char in code:
-                    say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
+                for char in code_list:
+                    say.say_as(f",,,,,{str(char)},,,,,", interpret_as="spell-out")
                 say.p(f",,,Again, {msg},,,")
-                for char in code:
-                    say.say_as(f",,,,,{char},,,,,", interpret_as="spell-out")
+                for char in code_list:
+                    say.say_as(f",,,,,{str(char)},,,,,", interpret_as="spell-out")
                 say.p(",,,Goodbye!")
                 response.append(say)
                 print(response.to_xml())

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.conf import settings
 import random
+from random import randint
 import string
 from django.contrib.auth.hashers import make_password
 
@@ -17,10 +18,17 @@ AUTH_CODE_DELIVERY_CHOICES = [
 ]
 
 
-def random_string(string_length=CODE_STRING_LENGTH, all_uppercase=True, all_lowercase=False, mixed_case=False, include_numbers=True):
+def random_string(string_length=CODE_STRING_LENGTH, all_uppercase=True, all_lowercase=False, mixed_case=False,
+                  include_numbers=True, only_numbers=False):
     letters = string.ascii_letters
     if include_numbers:
         letters += string.octdigits
+
+    if only_numbers:
+        range_start = 10 ** (string_length - 1)
+        range_end = (10 ** string_length) - 1
+        return str(randint(range_start, range_end))
+
     if all_uppercase:
         return ''.join(random.choice(letters.upper()) for i in range(string_length))
     elif all_lowercase:
@@ -78,7 +86,7 @@ class AuthCode(models.Model):
             return obj.create_code()
 
     def create_code(self):
-        code = random_string()
+        code = random_string(only_numbers=True)
         self.code = generate_code(code=code)
         self.expires = get_expiration()
         self.save()
