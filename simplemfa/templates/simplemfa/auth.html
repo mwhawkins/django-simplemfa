@@ -24,7 +24,7 @@
                         <p style="color:green;text-align:center;margin-bottom: 5px;font-weight:400;">* {{ message }}</p>
                     {% endfor %}
                 {% endif %}
-
+    {% if mfa_code_sent %}
               <!-- Form -->
               <form action="{% url 'simplemfa:mfa-login' %}" method="post">
                   <input type="hidden" name="next" value="{{ next|default:"/" }}">
@@ -43,11 +43,38 @@
 
               <footer>
                 <p>
-                      Didn't get a code? <a href="{% url "simplemfa:mfa-request" %}">Request a new one</a>.
+                      Didn't get your code? <a href="{% url "simplemfa:mfa-request" %}?reset=true">Request a new one</a>.
                 </p>
                   <br />
                 <p>
                     Not ready to authenticate? <a href="{% url 'logout' %}">Log out</a>.
                 </p>
               </footer>
+        {% else %}
+            <!-- Form -->
+              <form action="{% url 'simplemfa:mfa-request' %}" method="get">
+                  <input type="hidden" name="next" value="{{ next|default:'/' }}">
+                  <input type="hidden" name="user_id" value="{{ request.user.id }}">
+                  {% csrf_token %}
+                Please select a way to receive your code:<br />
+                    <label>
+                        <input name="sent_via" value="EMAIL" checked="" type="radio">
+                        Email to {{ sanitized_email }}
+                    </label>
+                    {% if sanitized_phone %}
+                        <label>
+                            <input name="sent_via" value="TEXT" checked="" type="radio">
+                            Text Message to {{ sanitized_phone }}
+                        </label>
+                        <label>
+                            <input name="sent_via" value="PHONE" checked="" type="radio">
+                            Phone Call to {{ sanitized_phone }}
+                        </label>
+                    {% endif %}
+                  <div>
+                    <button type="submit">Request Code</button>
+                </div>
+              </form>
+              <!-- End Form -->
+        {% endif %}
 {% endblock %}

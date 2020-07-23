@@ -9,7 +9,7 @@ from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 from simplemfa.helpers import template_fallback, get_user_mfa_mode
 from django.contrib import messages
-from simplemfa.helpers import send_mfa_code
+from simplemfa.helpers import send_mfa_code, get_user_phone
 
 
 class MFALoginView(LoginRequiredMixin, TemplateView):
@@ -23,38 +23,37 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
         context['form'] = self.form_class(initial=initial)
         context['next'] = next_url
 
-        # if this session key is not set, we send a code - this prevents new codes being generated on page refresh
-        if not request.session.get("_simplemfa_code_sent", False):
+        context['mfa_code_sent'] = request.session.get("_simplemfa_code_sent", False)
 
-            try:
-                # delete old codes (if any) for this user
-                AuthCode.delete_all_codes_for_user(request.user.id)
+        email = request.user.email
+        email_parts = email.split("@")
+        rd = round(len(email_parts[0]) * .25)
+        email_result = []
+        for i in range(len(email_parts[0]) - 1):
+            if i >= rd:
+                email_result.append("*")
+            else:
+                email_result.append(email_parts[0][i])
+        email = ""
+        for res in email_result:
+            email += res
+        email += f"@{email_parts[1]}"
+        context['sanitized_email'] = email
 
-                # the selected mode for the user to get the code
-                mode = get_user_mfa_mode(request)
-
-                # create the new MFA auth object
-                code = AuthCode.create_code_for_user(request.user.id, sent_via=mode)
-
-                # if code is good, process it
-                if code is not None:
-                    request.session['_simplemfa_code_sent'] = True
-
-                    # eventually replace this with send_mfa_code(request, code, mode) where mode is how it is to be sent
-                    send_mfa_code(request, code, mode=mode)
-
-                    # for testing in development
-                    if settings.DEBUG:
-                        print("MFA CODE: " + code)
-
+        phone = get_user_phone(request)
+        if phone is not None:
+            phone = phone.replace("+1", "")
+            rd = round(len(phone) * .63)
+            phone_result = []
+            for i in range(len(phone)):
+                if i < rd:
+                    phone_result.append("*")
                 else:
-                    raise Exception
-
-            except Exception:
-                AuthCode.delete_all_codes_for_user(request.user.id)
-                request.session['_simplemfa_code_sent'] = False
-                messages.add_message(request, messages.ERROR,
-                                     "Something went wrong. A code was not created. Try again.")
+                    phone_result.append(phone[i])
+            phone = ""
+            for res in phone_result:
+                phone += res
+            context['sanitized_phone'] = phone
 
         return render(request, self.get_template_names(), context)
 
@@ -95,39 +94,52 @@ OUTPUT: JSON response (result)
 class MFARequestView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
-        # variables
-        mode = request.GET.get("sent_via", get_user_mfa_mode(request))
 
-        # start doing some work
+        reset = request.GET.get("reset", None)
         response = {}
-        try:
-            # delete old codes (if any) for this user
-            AuthCode.delete_all_codes_for_user(request.user.id)
+        if reset is not None and reset.upper() == "TRUE":
+            request.session['_simplemfa_code_sent'] = False
+        else:
+            # variables
+            mode = request.GET.get("sent_via", get_user_mfa_mode(request))
 
-            # create the new MFA auth object
-            code = AuthCode.create_code_for_user(request.user.id, sent_via=mode)
+            # start doing some work
+            response = {}
+            try:
+                # delete old codes (if any) for this user
+                AuthCode.delete_all_codes_for_user(request.user.id)
 
-            # send email or text to the user, depending on selected mode
-            send_mfa_code(request, code, mode=mode)
+                # create the new MFA auth object
+                code = AuthCode.create_code_for_user(request.user.id, sent_via=mode)
 
-            # for testing in development
-            if settings.DEBUG:
-                print("MFA CODE: " + code)
+                # send email or text to the user, depending on selected mode
+                send_mfa_code(request, code, mode=mode)
 
-            # the result is good, code is created and sent
-            response['code_created'] = True
+                # for testing in development
+                if settings.DEBUG:
+                    print("MFA CODE: " + code)
 
-        except:
-            # something went wrong, let them know no new code was issued
-            AuthCode.delete_all_codes_for_user(request.user.id)
-            response['code_created'] = False
-            messages.add_message(request, messages.ERROR, "Something went wrong. A code was not created. Try again.")
+                if code is not None:
+                    messages.add_message(request, messages.SUCCESS, "A new code has been sent.")
+                    request.session['_simplemfa_code_sent'] = True
+                    # the result is good, code is created and sent
+                    response['code_created'] = True
+
+            except:
+                # something went wrong, let them know no new code was issued
+                AuthCode.delete_all_codes_for_user(request.user.id)
+                response['code_created'] = False
+                request.session['_simplemfa_code_sent'] = False
+                messages.add_message(request, messages.ERROR, "Something went wrong. A code was not created. Try again.")
 
         if request.is_ajax():
             return JsonResponse(response)
         else:
-            messages.add_message(request, messages.SUCCESS, "A new code has been sent.")
-            return redirect(reverse("simplemfa:mfa-login"), request)
+            next_url = request.GET.get("next", None)
+            url = reverse("simplemfa:mfa-login")
+            if next_url is not None:
+                url += f"?next={next_url}"
+            return redirect(url, request)
 
     def post(self, request, *args, **kwargs):
         # request must be AJAX
@@ -163,10 +175,12 @@ class MFARequestView(LoginRequiredMixin, View):
             # the result is good
             response['code_created'] = True
             response['message'] = "A new code was created and has been sent."
+            request.session['_simplemfa_code_sent'] = True
 
         except:
             # something went wrong, let them know no new code was issued or sent
             AuthCode.delete_all_codes_for_user(request.user.id)
+            request.session['_simplemfa_code_sent'] = False
             response['code_created'] = False
             response['message'] = "Something went wrong and we were unable to generate a new code. Try again."
 

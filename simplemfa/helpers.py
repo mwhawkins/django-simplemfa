@@ -136,3 +136,10 @@ def send_mfa_code(request, code, mode=None):
     else:
         return send_mfa_code_email(request, code)
 
+
+def get_user_phone(request):
+    if hasattr(settings, "MFA_USER_PHONE_ATTRIBUTE"):
+        mode_attr_string = f"request.user.{settings.MFA_USER_PHONE_ATTRIBUTE}"
+        return eval(mode_attr_string) if eval(mode_attr_string) is not None else None
+    return None
+
