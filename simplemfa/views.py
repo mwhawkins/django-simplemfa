@@ -42,7 +42,7 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
 
         phone = get_user_phone(request)
         if phone is not None:
-            phone = phone.replace("+1", "")
+            phone = phone.replace("+", "")
             rd = round(len(phone) * .63)
             phone_result = []
             for i in range(len(phone)):
