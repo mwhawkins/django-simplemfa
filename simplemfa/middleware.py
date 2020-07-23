@@ -16,6 +16,9 @@ class ValidateMFAMiddleware:
         if getattr(view_func, 'login_exempt', False):
             return None
 
+        if "_simplemfa_trusted_device" in request.COOKIES:
+            return None
+
         if 'simplemfa' in request.resolver_match.namespaces:
             return None
 

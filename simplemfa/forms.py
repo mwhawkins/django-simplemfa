@@ -9,6 +9,7 @@ class MFAAuth(forms.Form):
     user_id = forms.IntegerField(widget=forms.HiddenInput())
     auth_code = forms.CharField(required=True, widget=forms.TextInput())
     next = forms.CharField(widget=forms.HiddenInput())
+    trusted_device = forms.CharField(widget=forms.CheckboxInput())
 
     def clean(self):
         cleaned_data = super().clean()

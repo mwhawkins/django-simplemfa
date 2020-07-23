@@ -9,7 +9,8 @@ from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 from simplemfa.helpers import template_fallback, get_user_mfa_mode
 from django.contrib import messages
-from simplemfa.helpers import send_mfa_code, get_user_phone
+from simplemfa.helpers import send_mfa_code, get_user_phone, set_cookie
+from django.utils import timezone
 
 
 class MFALoginView(LoginRequiredMixin, TemplateView):
@@ -81,11 +82,16 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
             request.session['_simplemfa_authenticated'] = True
 
             if next_url is not None:
-                return redirect(next_url, request)
+                response = redirect(next_url, request)
             else:
                 # where do we go after being authenticated if not set in next_url?
                 redirect_view = settings.LOGIN_REDIRECT_URL if hasattr(settings, 'LOGIN_REDIRECT_URL') else "home"
-                return redirect(reverse(redirect_view), request)
+                response = redirect(reverse(redirect_view), request)
+
+            if form_data.cleaned_data.get("trusted_device").upper() == "TRUE":
+                set_cookie(response, "_simplemfa_trusted_device", timezone.now())
+            return response
+
         else:
             context = {"form": form_data, "form_errors": form_data.errors, "next": next_url}
             return render(request, self.get_template_names(), context)

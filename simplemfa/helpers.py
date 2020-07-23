@@ -5,6 +5,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 from twilio.twiml.voice_response import VoiceResponse, Say
 from twilio.rest import Client
+from django.utils import timezone
 
 
 def get_client_ip(request):
@@ -152,3 +153,20 @@ def get_user_phone(request):
         return eval(mode_attr_string) if eval(mode_attr_string) is not None else None
     return None
 
+
+def get_cookie_expiration():
+    if hasattr(settings, "MFA_COOKIE_EXPIRATION_DAYS"):
+        return settings.MFA_COOKIE_EXPIRATION_DAYS
+    else:
+        return 7
+
+
+def set_cookie(response, key, value, days_expire=get_cookie_expiration()):
+    if days_expire is None:
+        max_age = 7 * 24 * 60 * 60  # seven days
+    else:
+        max_age = days_expire * 24 * 60 * 60
+    expires = timezone.datetime.strftime(timezone.now() + timezone.timedelta(seconds=max_age),
+                                         "%a, %d-%b-%Y %H:%M:%S UTC")
+    response.set_cookie(key, value, max_age=max_age, expires=expires, domain=settings.SESSION_COOKIE_DOMAIN,
+                        secure=settings.SESSION_COOKIE_SECURE or None)
