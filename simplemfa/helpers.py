@@ -55,7 +55,8 @@ def send_mfa_code_email(request, code):
     context = get_message_context(request, code)
     msg = html_template.render(context)
     subject = f"{context['app_name']} Verification Code"
-    default_from_email = settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else "user@localhost"
+    default_from_email = settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else \
+        f"no-reply@{request.META.get('HTTP_HOST')}"
     return send_mail(subject, msg, default_from_email, [request.user.email], fail_silently=False)
 
 
