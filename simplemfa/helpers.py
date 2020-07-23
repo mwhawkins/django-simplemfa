@@ -68,6 +68,7 @@ def send_mfa_code_text(request, code):
         try:
             recipient = eval(phone_object_string)
             if recipient is not None:
+                recipient = parse_phone(recipient)
                 client.messages.create(to=recipient,
                                        from_=settings.TWILIO_NUMBER,
                                        body=msg)
@@ -87,6 +88,7 @@ def send_mfa_code_phone(request, code):
         try:
             recipient = eval(phone_object_string)
             if recipient is not None:
+                recipient = parse_phone(recipient)
                 response = VoiceResponse()
                 code_list = [str(i) for i in str(code)]
                 say = Say()
@@ -109,6 +111,13 @@ def send_mfa_code_phone(request, code):
         except:
             return False
     return False
+
+
+def parse_phone(phone):
+    result = phone
+    if "+" not in result:
+        result = "+" + result
+    return result.replace("-","").replace("(","").replace(")","").replace(" ","")
 
 
 def get_user_mfa_mode(request):

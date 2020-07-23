@@ -27,41 +27,43 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
 
         email = request.user.email
         email_parts = email.split("@")
-        rd = round(len(email_parts[0]) * .25)
         domain_parts = email_parts[1].split('.')
+
+        # Sanitize the email address
         email_result = ""
-        for i in range(len(email_parts[0]) - 1):
-            if i >= rd:
-                email_result += "*"
-            else:
+        for i in range(len(email_parts[0])):
+            if i == len(email_parts[0]) - 1:
                 email_result += email_parts[0][i]
+            elif i == 0:
+                email_result += email_parts[0][i]
+            else:
+                email_result += "*"
         email = email_result
 
         domain_result = ""
-        rd = 1
-        for i in range(len(domain_parts[0]) - 1):
-            if i >= rd:
-                domain_result += "*"
-            else:
+        for i in range(len(domain_parts[0])):
+            if i == len(domain_parts[0]) - 1:
                 domain_result += domain_parts[0][i]
+            elif i == 0:
+                domain_result += domain_parts[0][i]
+            else:
+                domain_result += "*"
         domain = f"{domain_result}.{domain_parts[1]}"
 
         context['sanitized_email'] = f"{email}@{domain}"
 
+        # Sanitize the phone number
         phone = get_user_phone(request)
         if phone is not None:
-            phone = phone.replace("+", "")
-            rd = round(len(phone) * .63)
-            phone_result = []
+            phone = phone.replace("+","").replace("-","").replace("(","").replace(")","")
+            phone_result = ""
             for i in range(len(phone)):
-                if i < rd:
-                    phone_result.append("*")
+                if i < len(phone) - 4:
+                    phone_result += "*"
                 else:
-                    phone_result.append(phone[i])
-            phone = ""
-            for res in phone_result:
-                phone += res
-            context['sanitized_phone'] = phone
+                    phone_result += phone[i]
+
+            context['sanitized_phone'] = phone_result
 
         return render(request, self.get_template_names(), context)
 
