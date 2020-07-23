@@ -45,7 +45,7 @@
 
               <footer>
                 <p>
-                      Didn't get your code? <a href="{% url "simplemfa:mfa-request" %}?reset=true">Request a new one</a>.
+                      Didn't get your code? <a href="{% url "simplemfa:mfa-request" %}?reset=true{% if next %}&next={{ next }}{% endif %}">Request a new one</a>.
                 </p>
                   <br />
                 <p>
