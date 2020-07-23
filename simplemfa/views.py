@@ -28,17 +28,25 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
         email = request.user.email
         email_parts = email.split("@")
         rd = round(len(email_parts[0]) * .25)
-        email_result = []
+        domain_parts = email_parts[1].split('.')
+        email_result = ""
         for i in range(len(email_parts[0]) - 1):
             if i >= rd:
-                email_result.append("*")
+                email_result += "*"
             else:
-                email_result.append(email_parts[0][i])
-        email = ""
-        for res in email_result:
-            email += res
-        email += f"@{email_parts[1]}"
-        context['sanitized_email'] = email
+                email_result += email_parts[0][i]
+        email = email_result
+
+        domain_result = ""
+        rd = 1
+        for i in range(len(domain_parts[0]) - 1):
+            if i >= rd:
+                domain_result += "*"
+            else:
+                domain_result += domain_parts[0][i]
+        domain = f"{domain_result}.{domain_parts[1]}"
+
+        context['sanitized_email'] = f"{email}@{domain}"
 
         phone = get_user_phone(request)
         if phone is not None:
