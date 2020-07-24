@@ -43,7 +43,7 @@ Add `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))` to your rou
 
 ## Settings (`settings.py`)
 
-### Required Settings
+### Required Settings:
 
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
 - Required: Ensure the Django [email system is configured properly](https://docs.djangoproject.com/en/3.0/topics/email/) 
@@ -61,7 +61,8 @@ Add `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))` to your rou
 - Required: Install and set up [djang-twilio](https://django-twilio.readthedocs.io/en/latest/)
 - Required: `MFA_USER_PHONE_ATTRIBUTE` (the attribute of `request.user` that has the phone number for the user in the format `+12345678900`, e.g. `profile.phone` resolves to `request.user.profile.phone`)
 
-### Optional Settings
+### Optional Settings:
+
 - Optional: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_COOKIE_EXPIRATION_DAYS` (the default "remember me" period, default is 7)
@@ -69,7 +70,8 @@ Add `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))` to your rou
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
 - Optional: `MFA_USER_MODE_ATTRIBUTE` (the attribute of `request.user` that has the user's default way of receiving the MFA code, e.g. `profile.mfa_mode` resolves to `request.user.profile.mfa_mode` which must be one of the choices from `simplemfa.models.AUTH_CODE_DELIVERY_CHOICES` - currently "EMAIL", "TEXT", and "PHONE")
 
-### Migrations and Running
+### Migrations and Running:
+
 Once those items are complete, run `makemigrations` and `migrate` for your project, then run your project. That's it!
 
 It should allow you to access all public (login exempt) pages. After you log in, however, it will automatically redirect you to the MFA verification page where you will request and then enter an MFA code. If the code passes, you will be allowed to proceed as any normal authenticated user would in your application.
