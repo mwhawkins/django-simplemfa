@@ -1,5 +1,5 @@
 # django-simplemfa
-An implementation of basic Multi-Factor Authentication (MFA) functionality for Django applications (phone call, text message, and email).
+An easy-to-integrate implementation of essential Multi-Factor Authentication (MFA) functionality for Django applications.
 
 [Available on PyPI](https://pypi.org/project/django-simplemfa/) (`pip install django-simplemfa`)
 
