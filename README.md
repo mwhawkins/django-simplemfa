@@ -27,7 +27,7 @@ Email MFA leverages the built-in Django email utilities.
 # Setup and Use
 Download or clone the `simplemfa` package here or install from PyPi with `pip install django-simplemfa`.
 
-**In your `templates` directory:**
+## In your `templates` directory:
 
 Create a new directory called 'simplemfa' and in it place or create the following template:
 - `simplemfa/auth.html` (the MFA login screen template)
@@ -39,13 +39,13 @@ The following templates are optional if you want to override the default content
 
 Examples and defaults are provided in the package's `templates` directory (`simplemfa/templates`).
 
-**In your `urls.py`:**
+## In your `urls.py`:
 
 Add `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))` to your routes, making sure to include the namespace as shown.
 
-**In your `settings.py`:**
+## In your `settings.py`:
 
-Required Settings:
+### Required Settings:
 - Required: `REQUIRE_MFA = True` (global setting which activates MFA for all users)
 - Required: Ensure the Django [email system is configured properly](https://docs.djangoproject.com/en/3.0/topics/email/) 
 - Required: ```INSTALLED_APPS = [
@@ -61,7 +61,7 @@ If using Twilio (text and voice):
 - Required: Install and set up [djang-twilio](https://django-twilio.readthedocs.io/en/latest/)
 - Required: `MFA_USER_PHONE_ATTRIBUTE` (the attribute of `request.user` that has the phone number for the user in the format `+12345678900`, e.g. `profile.phone` resolves to `request.user.profile.phone`)
 
-Optional Settings:
+### Optional Settings:
 - Optional: `APP_NAME = "My App Name"` (application name which is provided in the messages to the user)
 - Optional: `MFA_CODE_LENGTH` (default is 6)
 - Optional: `MFA_COOKIE_EXPIRATION_DAYS` (the default "remember me" period, default is 7)
