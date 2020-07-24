@@ -89,21 +89,18 @@ def send_mfa_code_phone(request, code):
         phone_object_string = f"request.user.{settings.MFA_USER_PHONE_ATTRIBUTE}"
         try:
             recipient = eval(phone_object_string)
+            code_list = [str(i) for i in str(code)]
             if recipient is not None:
                 recipient = parse_phone(recipient)
                 response = VoiceResponse()
-                code_list = [str(i) for i in str(code)]
                 say = Say()
-                say.p(f",,,{msg},,,")
+                say.p(f",,,,,,,,,{msg},,,,,,,,,...")
                 for char in code_list:
-                    say.say_as(f",,,,,{str(char)},,,,,", interpret_as="spell-out")
-                say.p(f",,,Again, {msg},,,")
+                    say.say_as(f",,,,,,,,...{str(char)},,,,,,,,...", interpret_as="spell-out")
+                say.p(f",,,,,,,,,...Again, {msg},,,,,,,,,")
                 for char in code_list:
-                    say.say_as(f",,,,,{str(char)},,,,,", interpret_as="spell-out")
-                say.p(f",,,Again, {msg},,,")
-                for char in code_list:
-                    say.say_as(f",,,,,{str(char)},,,,,", interpret_as="spell-out")
-                say.p(",,,Goodbye!")
+                    say.say_as(f",,,,,,,,...{str(char)},,,,,,,,...", interpret_as="spell-out")
+                say.p(",,,,,,Goodbye!")
                 response.append(say)
                 print(response.to_xml())
                 client.calls.create(to=recipient,
@@ -171,3 +168,50 @@ def set_cookie(response, key, value, days_expire=get_cookie_expiration()):
                                          "%a, %d-%b-%Y %H:%M:%S UTC")
     response.set_cookie(key, value, max_age=max_age, expires=expires, domain=settings.SESSION_COOKIE_DOMAIN,
                         secure=settings.SESSION_COOKIE_SECURE or None)
+
+
+def sanitize_email(email):
+    if email is not None:
+        email_parts = email.split("@")
+        domain_parts = email_parts[1].split('.')
+
+        email_result = ""
+        for i in range(len(email_parts[0])):
+            if i == len(email_parts[0]) - 1 or i == 0:
+                email_result += email_parts[0][i]
+            else:
+                email_result += "*"
+        email = email_result
+
+        domain_result = ""
+        for i in range(len(domain_parts[0])):
+            if i == len(domain_parts[0]) - 1 or i == 0:
+                domain_result += domain_parts[0][i]
+            else:
+                domain_result += "*"
+        domain = f"{domain_result}.{domain_parts[1]}"
+
+        return f"{email}@{domain}"
+    return None
+
+
+def sanitize_phone(phone):
+    if phone is not None:
+        phone = parse_phone(phone).replace("+", "")
+        phone_result = ""
+        for i in range(len(phone)):
+            if i < len(phone) - 4:
+                phone_result += "*"
+            else:
+                phone_result += phone[i]
+        return phone_result
+    return None
+
+
+def build_mfa_request_url(request):
+    next_url = request.GET.get("next", None)
+    request_url = reverse("simplemfa:mfa-request")
+    request_url += "?reset=true"
+    if next_url is not None:
+        request_url += f"&next={next_url}"
+    return request_url

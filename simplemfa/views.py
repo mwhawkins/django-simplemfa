@@ -7,10 +7,10 @@ from simplemfa.models import AuthCode
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
-from simplemfa.helpers import template_fallback, get_user_mfa_mode
 from django.contrib import messages
-from simplemfa.helpers import send_mfa_code, get_user_phone, set_cookie
 from django.utils import timezone
+from simplemfa.helpers import send_mfa_code, get_user_mfa_mode, get_user_phone, parse_phone, set_cookie, get_cookie_expiration, \
+    sanitize_email, sanitize_phone, template_fallback, build_mfa_request_url
 
 
 class MFALoginView(LoginRequiredMixin, TemplateView):
@@ -23,77 +23,50 @@ class MFALoginView(LoginRequiredMixin, TemplateView):
         initial = {"user_id": request.user.id, "next": next_url}
         context['form'] = self.form_class(initial=initial)
         context['next'] = next_url
-
         context['mfa_code_sent'] = request.session.get("_simplemfa_code_sent", False)
+        context['default_mode'] = get_user_mfa_mode(request)
+        context['trusted_device_days'] = get_cookie_expiration()
+        context['request_url'] = build_mfa_request_url(request)
 
         email = request.user.email
-        email_parts = email.split("@")
-        domain_parts = email_parts[1].split('.')
+        context['sanitized_email'] = sanitize_email(email)
 
-        # Sanitize the email address
-        email_result = ""
-        for i in range(len(email_parts[0])):
-            if i == len(email_parts[0]) - 1:
-                email_result += email_parts[0][i]
-            elif i == 0:
-                email_result += email_parts[0][i]
-            else:
-                email_result += "*"
-        email = email_result
-
-        domain_result = ""
-        for i in range(len(domain_parts[0])):
-            if i == len(domain_parts[0]) - 1:
-                domain_result += domain_parts[0][i]
-            elif i == 0:
-                domain_result += domain_parts[0][i]
-            else:
-                domain_result += "*"
-        domain = f"{domain_result}.{domain_parts[1]}"
-
-        context['sanitized_email'] = f"{email}@{domain}"
-
-        # Sanitize the phone number
-        phone = get_user_phone(request)
-        if phone is not None:
-            phone = phone.replace("+","").replace("-","").replace("(","").replace(")","")
-            phone_result = ""
-            for i in range(len(phone)):
-                if i < len(phone) - 4:
-                    phone_result += "*"
-                else:
-                    phone_result += phone[i]
-
-            context['sanitized_phone'] = phone_result
+        phone = sanitize_phone(get_user_phone(request))
+        context['sanitized_phone'] = phone
 
         return render(request, self.get_template_names(), context)
 
     def post(self, request, *args, **kwargs):
         form_data = self.form_class(request.POST)
-        next_url = request.GET.get("next", None)
-
-        # the form authenticates the code provided, returns True if it checks out
         if form_data.authenticate():
-
-            # replace the original next_url with data from the form (if any)
             next_url = form_data.cleaned_data.get("next", request.GET.get("next", None))
-
-            # this authenticates the user, letting the middleware know they have passed verification
             request.session['_simplemfa_authenticated'] = True
-
             if next_url is not None:
                 response = redirect(next_url, request)
             else:
-                # where do we go after being authenticated if not set in next_url?
-                redirect_view = settings.LOGIN_REDIRECT_URL if hasattr(settings, 'LOGIN_REDIRECT_URL') else "home"
+                redirect_view = settings.LOGIN_REDIRECT_URL if hasattr(settings, 'LOGIN_REDIRECT_URL') else "index"
                 response = redirect(reverse(redirect_view), request)
-
             if form_data.cleaned_data.get("trusted_device").upper() == "TRUE":
                 set_cookie(response, "_simplemfa_trusted_device", timezone.now())
             return response
-
         else:
-            context = {"form": form_data, "form_errors": form_data.errors, "next": next_url}
+            request.session['_simplemfa_authenticated'] = False
+            context = self.get_context_data()
+            context['mfa_code_sent'] = request.session.get("_simplemfa_code_sent", False)
+            context['userid'] = request.user.id
+            context['next'] = form_data.cleaned_data.get("next", request.GET.get("next", None))
+            context['form'] = form_data
+            context['default_mode'] = get_user_mfa_mode(request)
+            context['trusted_device_days'] = get_cookie_expiration()
+            context['request_url'] = build_mfa_request_url(request)
+
+            email = request.user.email
+            context['sanitized_email'] = sanitize_email(email)
+
+            phone = sanitize_phone(get_user_phone(request))
+            context['sanitized_phone'] = phone
+
+            messages.add_message(request, messages.ERROR, "We were unable to authenticate the code provided")
             return render(request, self.get_template_names(), context)
 
     def get_template_names(self):
@@ -114,13 +87,12 @@ class MFARequestView(LoginRequiredMixin, View):
         reset = request.GET.get("reset", None)
         response = {}
         if reset is not None and reset.upper() == "TRUE":
+            AuthCode.delete_all_codes_for_user(request.user.id)
             request.session['_simplemfa_code_sent'] = False
         else:
             # variables
             mode = request.GET.get("sent_via", get_user_mfa_mode(request))
 
-            # start doing some work
-            response = {}
             try:
                 # delete old codes (if any) for this user
                 AuthCode.delete_all_codes_for_user(request.user.id)
@@ -140,19 +112,19 @@ class MFARequestView(LoginRequiredMixin, View):
                     request.session['_simplemfa_code_sent'] = True
                     # the result is good, code is created and sent
                     response['code_created'] = True
-
             except:
                 # something went wrong, let them know no new code was issued
                 AuthCode.delete_all_codes_for_user(request.user.id)
                 response['code_created'] = False
                 request.session['_simplemfa_code_sent'] = False
-                messages.add_message(request, messages.ERROR, "Something went wrong. A code was not created. Try again.")
+                messages.add_message(request, messages.ERROR,
+                                     "Something went wrong. A code was not created. Try again.")
 
         if request.is_ajax():
             return JsonResponse(response)
         else:
             next_url = request.GET.get("next", None)
-            url = reverse("simplemfa:mfa-login")
+            url = reverse("mfa:mfa-login")
             if next_url is not None:
                 url += f"?next={next_url}"
             return redirect(url, request)
@@ -188,16 +160,17 @@ class MFARequestView(LoginRequiredMixin, View):
             if settings.DEBUG:
                 print("MFA CODE: " + code)
 
-            # the result is good
-            response['code_created'] = True
-            response['message'] = "A new code was created and has been sent."
-            request.session['_simplemfa_code_sent'] = True
+            if code is not None:
+                request.session['_simplemfa_code_sent'] = True
+                # the result is good
+                response['code_created'] = True
+                response['message'] = "A new code was created and has been sent."
 
         except:
             # something went wrong, let them know no new code was issued or sent
             AuthCode.delete_all_codes_for_user(request.user.id)
-            request.session['_simplemfa_code_sent'] = False
             response['code_created'] = False
+            request.session['_simplemfa_code_sent'] = False
             response['message'] = "Something went wrong and we were unable to generate a new code. Try again."
 
         return JsonResponse(response)
