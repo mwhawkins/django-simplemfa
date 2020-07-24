@@ -22,7 +22,7 @@ Upon evaluating various other Django MFA applications, most appeared to be one o
 Twilio is the current integration for phone and text message MFA, but more are planned.
 Email MFA leverages the built-in Django email utilities.
 
-# Setup
+# Setup and Use
 Download or clone the `simplemfa` package here into your Django application or install from PyPi with `pip install django-simplemfa`.
 
 ## Templates (`templates/simplemfa`)
@@ -70,7 +70,7 @@ Add `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))` to your rou
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
 - Optional: `MFA_USER_MODE_ATTRIBUTE` (the attribute of `request.user` that has the user's default way of receiving the MFA code, e.g. `profile.mfa_mode` resolves to `request.user.profile.mfa_mode` which must be one of the choices from `simplemfa.models.AUTH_CODE_DELIVERY_CHOICES` - currently "EMAIL", "TEXT", and "PHONE")
 
-### Migrations and Running:
+## Migrations and Running:
 
 Once those items are complete, run `makemigrations` and `migrate` for your project, then run your project. That's it!
 
