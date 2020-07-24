@@ -70,7 +70,7 @@ Add `path('mfa/', include('simplemfa.urls', namespace="simplemfa"))` to your rou
 - Optional: `MFA_CODE_DELIVERY_DEFAULT` (default is "EMAIL")
 - Optional: `MFA_USER_MODE_ATTRIBUTE` (the attribute of `request.user` that has the user's default way of receiving the MFA code, e.g. `profile.mfa_mode` resolves to `request.user.profile.mfa_mode` which must be one of the choices from `simplemfa.models.AUTH_CODE_DELIVERY_CHOICES` - currently "EMAIL", "TEXT", and "PHONE")
 
-## Migrations and Running:
+## Migrate and Run
 
 Once those items are complete, run `makemigrations` and `migrate` for your project, then run your project. That's it!
 
