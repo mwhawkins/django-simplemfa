@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import check_password
 from simplemfa.models import AuthCode
 from django.utils import timezone
+from simplemfa.constants import MessageConstants
 
 
 class MFAAuth(forms.Form):
@@ -20,7 +21,7 @@ class MFAAuth(forms.Form):
         try:
             User.objects.get(id=user_id, is_active=True)
         except User.DoesNotExist:
-            self.add_error("user_id", "Your account was not found.")
+            self.add_error("user_id", MessageConstants.ACCOUNT_NOT_FOUND)
         else:
             user = User.objects.get(id=user_id, is_active=True)
 
@@ -28,13 +29,13 @@ class MFAAuth(forms.Form):
             now = timezone.now()
             auth = AuthCode.objects.get(user=user)
         except [AuthCode.DoesNotExist, AuthCode.MultipleObjectsReturned]:
-            self.add_error("auth_code", "The code for your account was not found. Please request a new one.")
+            self.add_error("auth_code", MessageConstants.MFA_CODE_NOT_FOUND)
         else:
             if auth.expires <= now:
-                self.add_error("auth_code", "Your code has expired. Please request a new one.")
+                self.add_error("auth_code", MessageConstants.MFA_CODE_EXPIRED)
                 auth.delete()
             elif not check_password(auth_code.upper(), auth.code):
-                self.add_error("auth_code", "We were unable to authenticate the code provided.")
+                self.add_error("auth_code", MessageConstants.MFA_CODE_NOT_AUTHENTICATED)
 
     def authenticate(self):
         if self.is_valid():
@@ -44,7 +45,6 @@ class MFAAuth(forms.Form):
                     auth.delete()
                 return True
             except:
-                self.add_error("auth_code", "We are unable to find any codes. "
-                                            "Request a new one and try again.")
+                self.add_error("auth_code", MessageConstants.MFA_CODE_NOT_AUTHENTICATED)
                 return False
         return False

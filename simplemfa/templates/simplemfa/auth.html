@@ -22,7 +22,7 @@
                 {% endif %}
         {% if mfa_code_sent %}
               <!-- Form -->
-              <form action="{% url 'simplemfa:mfa-login' %}" method="post">
+              <form action="{{ form_post_url }}" method="post">
                   <input type="hidden" name="next" value="{{ next|default:"/" }}">
                   <input type="hidden" name="user_id" value="{{ request.user.id }}">
                   {% csrf_token %}

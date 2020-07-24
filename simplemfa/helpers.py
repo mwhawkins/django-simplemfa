@@ -208,10 +208,20 @@ def sanitize_phone(phone):
     return None
 
 
-def build_mfa_request_url(request):
-    next_url = request.GET.get("next", None)
+def build_mfa_request_url(request, next_url=None):
+    if next_url is None:
+        next_url = request.GET.get("next", None)
     request_url = reverse("simplemfa:mfa-request")
     request_url += "?reset=true"
     if next_url is not None:
         request_url += f"&next={next_url}"
+    return request_url
+
+
+def build_mfa_post_url(request, next_url=None):
+    if next_url is None:
+        next_url = request.GET.get("next", None)
+    request_url = reverse("simplemfa:mfa-login")
+    if next_url is not None:
+        request_url += f"?next={next_url}"
     return request_url
